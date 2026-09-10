@@ -346,6 +346,31 @@
   box-shadow: none;
 }
 
+.prompt-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.prompt-char-count {
+  color: var(--ink-soft);
+  font-size: 0.78rem;
+}
+
+.prompt-char-count--over {
+  color: var(--danger);
+  font-weight: 700;
+}
+
+.prompt-error {
+  align-self: stretch;
+  color: var(--danger);
+  font-size: 0.82rem;
+  text-align: right;
+}
+
 .prompt-examples {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
