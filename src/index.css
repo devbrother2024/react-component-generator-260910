@@ -1,0 +1,82 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  color-scheme: light;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+
+  /* casing / surfaces */
+  --case: #dad0b4;
+  --panel: #f2ecd8;
+  --panel-dim: #e8dfc2;
+  --screen: #17140f;
+  --screen-ink: #e8dfc8;
+
+  /* ink + lines */
+  --ink: #221d14;
+  --ink-soft: #6e6350;
+  --line: #c7ba95;
+
+  /* signal (single accent) */
+  --signal: #b85420;
+  --signal-ink: #fbf3e4;
+  --signal-soft: #e9d3bc;
+
+  /* status */
+  --phosphor: #356b39;
+  --phosphor-soft: #dae3cd;
+  --danger: #a23a2a;
+  --danger-soft: #ecd6cd;
+
+  /* shadows: hard offset, never blurred */
+  --shadow: 4px 4px 0 var(--ink);
+  --shadow-sm: 3px 3px 0 var(--ink);
+  --shadow-press: 1px 1px 0 var(--ink);
+
+  --font-mono: 'IBM Plex Mono', 'Nanum Gothic Coding', ui-monospace, 'SFMono-Regular', Menlo,
+    Consolas, monospace;
+}
+
+body {
+  font-family: var(--font-mono);
+  background: var(--case);
+  color: var(--ink);
+  min-height: 100vh;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  background: var(--signal);
+  color: var(--signal-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
