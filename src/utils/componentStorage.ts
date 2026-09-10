@@ -4,6 +4,8 @@
 
 import type { GeneratedComponent } from '../types';
 
+export const MAX_COMPONENTS = 20;
+
 function isValidEntry(
   value: unknown
 ): value is { id: string; prompt: string; code: string; createdAt: string } {
@@ -41,4 +43,11 @@ export function reviveComponents(raw: unknown): GeneratedComponent[] {
   }
 
   return result;
+}
+
+export function addComponent(
+  components: GeneratedComponent[],
+  newComponent: GeneratedComponent
+): GeneratedComponent[] {
+  return [newComponent, ...components].slice(0, MAX_COMPONENTS);
 }

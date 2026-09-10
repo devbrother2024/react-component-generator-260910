@@ -2,28 +2,34 @@ import { useState, useEffect } from 'react';
 import { PromptInput } from './components/PromptInput';
 import { ComponentCard } from './components/ComponentCard';
 import { useComponentGenerator } from './hooks/useComponentGenerator';
+import { usePersistToStorage } from './hooks/usePersistToStorage';
 import type { Provider } from './types';
-import { loadFromStorage, saveToStorage } from './utils/storage';
+import { loadFromStorage } from './utils/storage';
 import { isProvider } from './utils/provider';
-import { addPromptToHistory } from './utils/promptHistory';
+import { isString } from './utils/guards';
+import { addPromptToHistory, isPromptHistory } from './utils/promptHistory';
 import { STORAGE_KEYS } from './utils/storageKeys';
 import './App.css';
 
-const PROVIDER_CONFIG = {
+const PROVIDER_CONFIG: Record<Provider, { label: string; placeholder: string }> = {
   anthropic: { label: 'Anthropic', placeholder: 'sk-ant-...' },
   google: { label: 'Google', placeholder: 'AIza...' },
-} as const;
+};
 
 function App() {
-  const [apiKey, setApiKey] = useState(() => loadFromStorage(STORAGE_KEYS.apiKey, ''));
+  const [apiKey, setApiKey] = useState(() => {
+    const stored = loadFromStorage<unknown>(STORAGE_KEYS.apiKey, '');
+    return isString(stored) ? stored : '';
+  });
   const [showKey, setShowKey] = useState(false);
   const [provider, setProvider] = useState<Provider>(() => {
     const stored = loadFromStorage<unknown>(STORAGE_KEYS.provider, 'google');
     return isProvider(stored) ? stored : 'google';
   });
-  const [promptHistory, setPromptHistory] = useState<string[]>(() =>
-    loadFromStorage<string[]>(STORAGE_KEYS.promptHistory, [])
-  );
+  const [promptHistory, setPromptHistory] = useState<string[]>(() => {
+    const stored = loadFromStorage<unknown>(STORAGE_KEYS.promptHistory, []);
+    return isPromptHistory(stored) ? stored : [];
+  });
   const [envKeys, setEnvKeys] = useState<Record<Provider, boolean>>({
     anthropic: false,
     google: false,
@@ -38,17 +44,9 @@ function App() {
       .catch(() => {});
   }, []);
 
-  useEffect(() => {
-    saveToStorage(STORAGE_KEYS.apiKey, apiKey);
-  }, [apiKey]);
-
-  useEffect(() => {
-    saveToStorage(STORAGE_KEYS.provider, provider);
-  }, [provider]);
-
-  useEffect(() => {
-    saveToStorage(STORAGE_KEYS.promptHistory, promptHistory);
-  }, [promptHistory]);
+  usePersistToStorage(STORAGE_KEYS.apiKey, apiKey);
+  usePersistToStorage(STORAGE_KEYS.provider, provider);
+  usePersistToStorage(STORAGE_KEYS.promptHistory, promptHistory);
 
   const hasEnvKey = envKeys[provider];
 

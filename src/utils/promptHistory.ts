@@ -11,3 +11,7 @@ export function addPromptToHistory(history: string[], prompt: string): string[] 
   const withoutDuplicate = history.filter((item) => item !== trimmed);
   return [trimmed, ...withoutDuplicate].slice(0, MAX_PROMPT_HISTORY);
 }
+
+export function isPromptHistory(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((item) => typeof item === 'string');
+}

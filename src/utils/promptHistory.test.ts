@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { addPromptToHistory, MAX_PROMPT_HISTORY } from './promptHistory';
+import { addPromptToHistory, isPromptHistory, MAX_PROMPT_HISTORY } from './promptHistory';
 
 describe('addPromptToHistory', () => {
   it('새 프롬프트를 맨 앞에 추가한다', () => {
@@ -33,5 +33,24 @@ describe('addPromptToHistory', () => {
 
   it('앞뒤 공백은 제거하고 저장한다', () => {
     expect(addPromptToHistory([], '  프로필 카드  ')).toEqual(['프로필 카드']);
+  });
+});
+
+describe('isPromptHistory', () => {
+  it('문자열 배열이면 true를 반환한다', () => {
+    expect(isPromptHistory(['A', 'B'])).toBe(true);
+    expect(isPromptHistory([])).toBe(true);
+  });
+
+  it('배열이 아니면 false를 반환한다', () => {
+    expect(isPromptHistory('old')).toBe(false);
+    expect(isPromptHistory(null)).toBe(false);
+    expect(isPromptHistory(undefined)).toBe(false);
+    expect(isPromptHistory({})).toBe(false);
+  });
+
+  it('배열 원소가 문자열이 아니면 false를 반환한다', () => {
+    expect(isPromptHistory([1, 2, 3])).toBe(false);
+    expect(isPromptHistory(['A', 1])).toBe(false);
   });
 });

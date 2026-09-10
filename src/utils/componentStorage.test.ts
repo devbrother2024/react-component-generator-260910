@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { reviveComponents } from './componentStorage';
+import { reviveComponents, addComponent, MAX_COMPONENTS } from './componentStorage';
+import type { GeneratedComponent } from '../types';
+
+function makeComponent(id: string): GeneratedComponent {
+  return { id, prompt: `prompt-${id}`, code: 'code', createdAt: new Date('2026-01-01T00:00:00.000Z') };
+}
 
 describe('reviveComponents', () => {
   it('배열이 아니면 빈 배열을 반환한다', () => {
@@ -62,5 +67,26 @@ describe('reviveComponents', () => {
     const result = reviveComponents(raw);
 
     expect(result.map((c) => c.id)).toEqual(['1', '3']);
+  });
+});
+
+describe('addComponent', () => {
+  it('새 컴포넌트를 맨 앞에 추가한다', () => {
+    const result = addComponent([], makeComponent('1'));
+    expect(result.map((c) => c.id)).toEqual(['1']);
+  });
+
+  it('기존 목록 앞에 새 컴포넌트를 추가한다', () => {
+    const result = addComponent([makeComponent('1')], makeComponent('2'));
+    expect(result.map((c) => c.id)).toEqual(['2', '1']);
+  });
+
+  it(`최대 개수(${MAX_COMPONENTS}개)를 초과하면 가장 오래된 항목부터 제거한다`, () => {
+    const existing = Array.from({ length: MAX_COMPONENTS }, (_, i) => makeComponent(`old-${i}`));
+    const result = addComponent(existing, makeComponent('new'));
+
+    expect(result).toHaveLength(MAX_COMPONENTS);
+    expect(result[0].id).toBe('new');
+    expect(result.map((c) => c.id)).not.toContain(`old-${MAX_COMPONENTS - 1}`);
   });
 });
