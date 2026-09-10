@@ -2,18 +2,34 @@ import { useState, useEffect } from 'react';
 import { PromptInput } from './components/PromptInput';
 import { ComponentCard } from './components/ComponentCard';
 import { useComponentGenerator } from './hooks/useComponentGenerator';
+import { usePersistToStorage } from './hooks/usePersistToStorage';
 import type { Provider } from './types';
+import { loadFromStorage } from './utils/storage';
+import { isProvider } from './utils/provider';
+import { isString } from './utils/guards';
+import { addPromptToHistory, isPromptHistory } from './utils/promptHistory';
+import { STORAGE_KEYS } from './utils/storageKeys';
 import './App.css';
 
-const PROVIDER_CONFIG = {
+const PROVIDER_CONFIG: Record<Provider, { label: string; placeholder: string }> = {
   anthropic: { label: 'Anthropic', placeholder: 'sk-ant-...' },
   google: { label: 'Google', placeholder: 'AIza...' },
-} as const;
+};
 
 function App() {
-  const [apiKey, setApiKey] = useState('');
+  const [apiKey, setApiKey] = useState(() => {
+    const stored = loadFromStorage<unknown>(STORAGE_KEYS.apiKey, '');
+    return isString(stored) ? stored : '';
+  });
   const [showKey, setShowKey] = useState(false);
-  const [provider, setProvider] = useState<Provider>('google');
+  const [provider, setProvider] = useState<Provider>(() => {
+    const stored = loadFromStorage<unknown>(STORAGE_KEYS.provider, 'google');
+    return isProvider(stored) ? stored : 'google';
+  });
+  const [promptHistory, setPromptHistory] = useState<string[]>(() => {
+    const stored = loadFromStorage<unknown>(STORAGE_KEYS.promptHistory, []);
+    return isPromptHistory(stored) ? stored : [];
+  });
   const [envKeys, setEnvKeys] = useState<Record<Provider, boolean>>({
     anthropic: false,
     google: false,
@@ -28,6 +44,10 @@ function App() {
       .catch(() => {});
   }, []);
 
+  usePersistToStorage(STORAGE_KEYS.apiKey, apiKey);
+  usePersistToStorage(STORAGE_KEYS.provider, provider);
+  usePersistToStorage(STORAGE_KEYS.promptHistory, promptHistory);
+
   const hasEnvKey = envKeys[provider];
 
   const handleGenerate = (prompt: string) => {
@@ -35,6 +55,7 @@ function App() {
       alert(`${PROVIDER_CONFIG[provider].label} API 키를 입력하거나 .env에 설정해주세요.`);
       return;
     }
+    setPromptHistory((prev) => addPromptToHistory(prev, prompt));
     generate(prompt, apiKey || undefined, provider);
   };
 
@@ -70,7 +91,7 @@ function App() {
 
       <main className="workspace">
         <section className="composer-panel" aria-label="컴포넌트 생성">
-          <PromptInput onGenerate={handleGenerate} isLoading={isLoading} />
+          <PromptInput onGenerate={handleGenerate} isLoading={isLoading} history={promptHistory} />
         </section>
 
         <aside className="settings-panel" aria-label="실행 설정">

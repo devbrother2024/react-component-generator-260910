@@ -4,6 +4,7 @@ import { validatePromptLength, MAX_PROMPT_LENGTH } from '../utils/validatePrompt
 interface PromptInputProps {
   onGenerate: (prompt: string) => void;
   isLoading: boolean;
+  history?: string[];
 }
 
 const EXAMPLES = [
@@ -15,7 +16,26 @@ const EXAMPLES = [
   '테이블 행 상세보기 패널. 선택한 고객의 기본 정보와 최근 활동 표시',
 ];
 
-export function PromptInput({ onGenerate, isLoading }: PromptInputProps) {
+interface PromptChipsProps {
+  label: string;
+  items: string[];
+  onSelect: (item: string) => void;
+}
+
+function PromptChips({ label, items, onSelect }: PromptChipsProps) {
+  return (
+    <div className="prompt-examples">
+      <span className="examples-label">{label}</span>
+      {items.map((item) => (
+        <button key={item} className="example-chip" onClick={() => onSelect(item)} type="button">
+          {item}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+export function PromptInput({ onGenerate, isLoading, history = [] }: PromptInputProps) {
   const [prompt, setPrompt] = useState('');
   const validation = validatePromptLength(prompt);
 
@@ -74,19 +94,10 @@ export function PromptInput({ onGenerate, isLoading }: PromptInputProps) {
           </span>
           {!validation.valid && <p className="prompt-error">{validation.error}</p>}
         </div>
-        <div className="prompt-examples">
-          <span className="examples-label">예시 프롬프트</span>
-          {EXAMPLES.map((example) => (
-            <button
-              key={example}
-              className="example-chip"
-              onClick={() => handleExampleClick(example)}
-              type="button"
-            >
-              {example}
-            </button>
-          ))}
-        </div>
+        {history.length > 0 && (
+          <PromptChips label="최근 프롬프트" items={history} onSelect={handleExampleClick} />
+        )}
+        <PromptChips label="예시 프롬프트" items={EXAMPLES} onSelect={handleExampleClick} />
       </div>
     </div>
   );

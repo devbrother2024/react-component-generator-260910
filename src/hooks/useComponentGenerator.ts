@@ -1,5 +1,9 @@
 import { useState, useCallback } from 'react';
 import type { GeneratedComponent, Provider } from '../types';
+import { loadFromStorage } from '../utils/storage';
+import { reviveComponents, addComponent } from '../utils/componentStorage';
+import { usePersistToStorage } from './usePersistToStorage';
+import { STORAGE_KEYS } from '../utils/storageKeys';
 
 interface UseComponentGeneratorReturn {
   components: GeneratedComponent[];
@@ -11,9 +15,13 @@ interface UseComponentGeneratorReturn {
 }
 
 export function useComponentGenerator(): UseComponentGeneratorReturn {
-  const [components, setComponents] = useState<GeneratedComponent[]>([]);
+  const [components, setComponents] = useState<GeneratedComponent[]>(() =>
+    reviveComponents(loadFromStorage(STORAGE_KEYS.components, []))
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  usePersistToStorage(STORAGE_KEYS.components, components);
 
   const generate = useCallback(async (prompt: string, apiKey: string | undefined, provider: Provider) => {
     setIsLoading(true);
@@ -39,7 +47,7 @@ export function useComponentGenerator(): UseComponentGeneratorReturn {
         createdAt: new Date(),
       };
 
-      setComponents((prev) => [newComponent, ...prev]);
+      setComponents((prev) => addComponent(prev, newComponent));
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error';
       setError(message);
